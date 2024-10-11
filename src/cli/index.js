@@ -1,24 +1,17 @@
-import os from 'node:os';
-import path from 'node:path';
 import readline from 'node:readline';
+import {getUserName}from "../user/user.js"
+import { getHomeDirectory, getCurrentDirectory,displayCurrentDirectory ,changeDirectory } from '../osInfo/osInfo.js';
 
 
-const args = process.argv;
-const getUserName = () => {
-    const userNameArg = args.find(arg => arg.startsWith('--username='));
-    if (userNameArg) {
-      const username = userNameArg.split('=').slice(1).join('=').trim();
-      if (!username) {
-        const userNameArgIndex = args.indexOf(userNameArg);
-        return args[userNameArgIndex + 1] ? args[userNameArgIndex + 1].trim() : "No Name User";
-      }
-      return username;
-    }
-    return process.env.npm_config_username || "No Name User";
-  };
 
-  const userName = getUserName()
-  console.log(`Welcome to the File Manager, ${userName}!`);
+const userName = getUserName();
+console.log(`Welcome to the File Manager, ${userName}!`);
+
+
+let currentDirectory = getCurrentDirectory();
+const homeDirectory = getHomeDirectory();
+console.log(`Starting working directory is: ${homeDirectory}`);
+displayCurrentDirectory(currentDirectory);
 
 
   const usersInputReader =readline.createInterface({
@@ -26,19 +19,55 @@ const getUserName = () => {
     output:process.stdout
   })
 
-  usersInputReader.on('line', (input) => {
-    if (input.trim() === '.exit') {
-      console.log(`Thank you for using File Manager, ${userName}, goodbye!`);
-      process.exit(0);
-    } else {
-      console.log(`You entered: ${input}`);
+//   const handleUserInput = (input) => {
+//     const args = input.trim().split(' ');
+//     const command = args[0];
 
+//     switch (command) {
+//         case 'cd':
+//             if (args[1]) {
+//                 currentDirectory = changeDirectory(currentDirectory, args[1]);
+//             } else {
+//                 console.log('Please provide a directory name.');
+//             }
+//             break;
+//         case 'ls':
+//             listFiles(currentDirectory);
+//             break;
+//         case 'add':
+//             if (args[1]) {
+//                 createFile(currentDirectory, args[1]);
+//             } else {
+//                 console.log('Please provide a file name.');
+//             }
+//             break;
+//         case '.exit':
+//             console.log(`Thank you for using File Manager, ${userName}, goodbye!`);
+//             process.exit(0);
+//             break;
+//         default:
+//             console.log(`Unknown command: ${command}`);
+//             break;
+//     }
+
+//     displayCurrentDirectory(currentDirectory);
+// };
+
+
+//   usersInputReader.on('line', handleUserInput);
+usersInputReader.on('line', (input) => {
+    if (input.trim() === '.exit') {
+        console.log(`Thank you for using File Manager, ${userName}, goodbye!`);
+        process.exit(0);
+    } else {
+        console.log(`You entered: ${input}`);
+        displayCurrentDirectory(currentDirectory);
     }
-  });
+});
 
 process.on('SIGINT', () => {
     console.log(`\nThank you for using File Manager, ${userName}, goodbye!`);
-    inputReader.close();
+    usersInputReader.close();
     process.exit(0);
 });
 
