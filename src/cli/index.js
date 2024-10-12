@@ -17,11 +17,9 @@ console.log(`Starting working directory is: ${homeDirectory}`);
     output:process.stdout
   })
 
-  const displayCurrentPath = () => {
-      const currentDirectory = getCurrentDirectory();
-      displayCurrentDirectory(currentDirectory); }
 
-displayCurrentPath();
+      displayCurrentDirectory();
+
 usersInputReader.on('line', async(input) => {
     if (input.trim() === '.exit') {
         console.log(`Thank you for using File Manager, ${userName}, goodbye!`);
@@ -29,7 +27,7 @@ usersInputReader.on('line', async(input) => {
     } else {
         console.log(`You entered: ${input}`);
         // await handleUserInput(input)
-        displayCurrentPath();   }
+        displayCurrentDirectory();   }
 });
 
 process.on('SIGINT', () => {
