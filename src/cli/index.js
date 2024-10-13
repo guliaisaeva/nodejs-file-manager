@@ -3,7 +3,8 @@ import {getUserName}from "../user/user.js";
 import { homeDirectory,displayCurrentDirectory,goUp,changeDirectory,listDirectoryContents} from '../directories/directory.js';
 import path from 'node:path';
 import {read} from "../fs/read.js";
-import {createEmptyFile} from "../fs/create.js"
+import {createEmptyFile} from "../fs/create.js";
+import  {renameFile} from "../fs/rename.js";
 
 
 const userName = getUserName();
@@ -37,7 +38,14 @@ const handleUserInput = async (input) => {
       } else {
         console.error('Please provide a valid file name.');
       }
-    }  else {
+    }else if (input.trim().startsWith('rn ')) {
+      const [oldFileName, newFileName] = input.slice(3).trim().split(' ');
+      if (oldFileName && newFileName) {
+        await renameFile(oldFileName, newFileName);
+      } else {
+        console.error('Please provide both old and new file names.');
+      }
+    }   else {
       throw new Error('Invalid command. Please use "up", "cd <path>",cat <filename>, add <filename>, or ".exit".');
     }
   } catch (error) {
