@@ -1,6 +1,9 @@
 import readline from 'node:readline';
 import {getUserName}from "../user/user.js";
-import { homeDirectory,currentDirectory,displayCurrentDirectory,goUp,changeDirectory,listDirectoryContents} from '../directories/directory.js';
+import { homeDirectory,displayCurrentDirectory,goUp,changeDirectory,listDirectoryContents} from '../directories/directory.js';
+import path from 'node:path';
+import {read} from "../fs/read.js";
+import {createEmptyFile} from "../fs/create.js"
 
 
 const userName = getUserName();
@@ -9,33 +12,39 @@ console.log(`Starting working directory is: ${homeDirectory}`);
 displayCurrentDirectory();
 
 
+
 const handleUserInput = async (input) => {
   try {
     console.log();
-      if (input === 'up') {
-          goUp();
-          promptUser();
-
-      } else if (input === '.exit') {
-          console.log(`Thank you for using File Manager, ${userName}, goodbye!`);
-          process.exit(0);
-      }
-      else if (input.startsWith('cd ')) {
-        const targetPath = input.slice(3).trim();
-                changeDirectory(targetPath);
-
-      }else if (input === 'ls') {
-        listDirectoryContents();
-
+    if (input === 'up') {
+      goUp();
+    } else if (input === '.exit') {
+      console.log(`Thank you for using File Manager, ${userName}, goodbye!`);
+      process.exit(0);
+    } else if (input.startsWith('cd ')) {
+      const targetPath = input.slice(3).trim();
+      await changeDirectory(targetPath);
+    } else if (input === 'ls') {
+      await listDirectoryContents();
+    }else if (input.trim().startsWith('cat ')) {
+      const targetFile = input.slice(4).trim();
+      const filePath = path.join(process.cwd(), targetFile);
+      await read(filePath);
+    }else if (input.trim().startsWith('add ')) {
+      const fileName = input.slice(4).trim();
+      if (fileName) {
+        await createEmptyFile(fileName);
       } else {
-        throw new Error('Invalid command. Please use "up", "cd <path>", or ".exit".');
-        promptUser();
+        console.error('Please provide a valid file name.');
       }
+    }  else {
+      throw new Error('Invalid command. Please use "up", "cd <path>",cat <filename>, add <filename>, or ".exit".');
+    }
   } catch (error) {
-      console.error(`Operation failed: ${error.message}`);
-      promptUser();
+    console.error(`Operation failed: ${error.message}`);
+  } finally {
+    promptUser();
   }
-  console.log();
 };
 
 const usersInputReader =readline.createInterface({
@@ -44,12 +53,9 @@ const usersInputReader =readline.createInterface({
 })
 
 export const promptUser = () => {
-
    usersInputReader.question('Enter a command: ', async (input) => {
-
     await handleUserInput(input.trim());
 });
-
 
 };
 
@@ -65,3 +71,5 @@ usersInputReader.on('close', () => {
     console.log(`Thank you for using File Manager, ${userName}, goodbye!`);
     process.exit(0);
   });
+//   const filePath = path.join(process.cwd(), 'src/fs/files/fileToRead.txt');
+// readFileContent(filePath);

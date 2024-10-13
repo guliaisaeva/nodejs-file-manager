@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { promptUser } from '../cli/index.js';
@@ -20,47 +20,39 @@ export const goUp = () => {
     }
   };
 
- export  const changeDirectory = (targetPath) => {
-    let resolvedPath;
+  export const changeDirectory = async (targetPath) => {
+    try {
+        let resolvedPath;
+        if (path.isAbsolute(targetPath)) {
+            resolvedPath = targetPath;
+        } else {
+            resolvedPath = path.resolve(currentDirectory, targetPath);
+        }
 
-    if (path.isAbsolute(targetPath)) {
-      resolvedPath = targetPath;
-    } else {
-      resolvedPath = path.resolve(currentDirectory, targetPath);
-    }
+        await fs.access(resolvedPath);
 
-    fs.access(resolvedPath, fs.constants.F_OK | fs.constants.R_OK, (err) => {
-      if (err) {
-        console.error(`Operation failed: Directory "${targetPath}" does not exist.`);
-      } else {
         const isRoot = resolvedPath === path.parse(resolvedPath).root;
         if (isRoot && resolvedPath !== homeDirectory) {
-          console.log('You are already at the root directory.');
+            console.log('You are already at the root directory.');
         } else {
-          currentDirectory = resolvedPath;
-          console.log(`Changed directory to: ${currentDirectory}`);
+            currentDirectory = resolvedPath;
+            console.log(`Changed directory to: ${currentDirectory}`);
         }
+    } catch (err) {
+        console.error(`Operation failed: Directory "${targetPath}" does not exist.`);
+    }
+    console.log();
+    promptUser();
+};
 
-      }
-      console.log();
-      promptUser();
+export const listDirectoryContents = async () => {
+    try {
+        const files = await fs.readdir(currentDirectory, { withFileTypes: true });
 
-    });
-  };
-
-export const listDirectoryContents = () => {
-    fs.readdir(currentDirectory, { withFileTypes: true }, (err, files) => {
-        if (err) {
-            console.error(`Operation failed: ${err.message}`);
-            return;
-        }
-
-        const fileDetails = files.map(file => {
-            return {
-                name: file.name,
-                type: file.isDirectory() ? 'directory' : 'file',
-            };
-        });
+        const fileDetails = files.map(file => ({
+            name: file.name,
+            type: file.isDirectory() ? 'directory' : 'file',
+        }));
 
         fileDetails.sort((a, b) => {
             if (a.type === b.type) {
@@ -83,8 +75,10 @@ export const listDirectoryContents = () => {
             console.log(`│ ${index.toString().padEnd(indexColumnWidth)} │ ${file.name.padEnd(maxNameLength)} │ ${file.type.padEnd(typeColumnWidth)} │`);
         });
 
-        console.log(`└${'─'.repeat(indexColumnWidth + 2)}┴${'─'.repeat(maxNameLength + 2)}┴${'─'.repeat(typeColumnWidth + 2)}┘`); // Bottom border
-    });
-    promptUser()
+        console.log(`└${'─'.repeat(indexColumnWidth + 2)}┴${'─'.repeat(maxNameLength + 2)}┴${'─'.repeat(typeColumnWidth + 2)}┘`);
+    } catch (err) {
+        console.error(`Operation failed: ${err.message}`);
+    }
 
+    promptUser();
 };

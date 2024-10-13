@@ -1,5 +1,5 @@
 import os from 'node:os';
-let currentDirectory = process.cwd();
+
 
 export const getHomeDirectory = () => os.homedir();
 export const getCurrentDirectory = () => process.cwd();
