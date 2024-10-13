@@ -8,6 +8,7 @@ import {createEmptyFile} from "../fs/create.js";
 import  {renameFile} from "../fs/rename.js";
 import  {copyFile} from "../fs/copy.js";
 import  {moveFile} from "../fs/move.js";
+import  {deleteFile} from "../fs/delete.js";
 
 
 
@@ -87,7 +88,14 @@ const handleUserInput = async (input) => {
     } else {
         console.error('Please provide both source and destination paths.');
     }
-} else {
+}else if (input.trim().startsWith('rm ')) {
+  const filePath = input.slice(3).trim();
+  if (filePath) {
+      await deleteFile(filePath);
+  } else {
+      console.error('Please provide a valid file path to delete.');
+  }
+}  else {
       throw new Error('Invalid command. Please use "up", "cd <path>",cat <filename>, add <filename>, or ".exit".');
     }
   } catch (error) {
