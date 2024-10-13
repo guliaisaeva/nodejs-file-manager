@@ -11,6 +11,8 @@ import  {moveFile} from "../fs/move.js";
 import  {deleteFile} from "../fs/delete.js";
 import  {handleOsCommand} from "../osInfo/osInfo.js";
 import  {fileHash} from "../hash/hash.js";
+import  {compressFile} from "../zip/compress.js";
+import  {decompressFile} from "../zip/decompress.js";
 
 
 
@@ -117,7 +119,67 @@ const handleUserInput = async (input) => {
   } else {
       console.error('Please provide a valid file path for hash calculation.');
   }
-}  else {
+}else if (input.trim().startsWith('compress ')) {
+  const args = input.slice(9).trim().split(' ');
+  const inputFilePath = args[0];
+  const outputDir = args[1];
+
+  if (inputFilePath && outputDir) {
+      try {
+          await fs.promises.access(inputFilePath);
+          await fs.promises.access(outputDir);
+
+          const outputFilePath = path.join(outputDir, `${path.basename(inputFilePath)}.br`);
+
+          try {
+              await fs.promises.access(outputFilePath);
+              console.error(`Error: Compressed file ${outputFilePath} already exists. Please choose a different name or location.`);
+              return;
+          } catch (error) {
+              if (error.code !== 'ENOENT') {
+                  throw error;
+              }
+          }
+
+          await compressFile(inputFilePath, outputDir);
+      } catch (error) {
+          console.error(`Operation failed: ${error.message}`);
+      }
+  } else {
+      console.error('Please provide both input and output file paths for compression.');
+  }
+} else if (input.trim().startsWith('decompress ')) {
+  const args = input.slice(11).trim().split(' ');
+  const inputFilePath = args[0];
+  const outputDir = args[1];
+
+  if (inputFilePath && outputDir) {
+      try {
+          await fs.promises.access(inputFilePath);
+          await fs.promises.access(outputDir);
+
+          const parsedPath = path.parse(inputFilePath);
+          const outputFilePath = path.join(outputDir, `${parsedPath.name}_decompressed${parsedPath.ext.replace('.br', '')}`);
+
+
+          try {
+              await fs.promises.access(outputFilePath);
+              console.error(`Error: Decompressed file ${outputFilePath} already exists. Please choose a different name or location.`);
+              return;
+          } catch (error) {
+              if (error.code !== 'ENOENT') {
+                  throw error;
+              }
+          }
+
+          await decompressFile(inputFilePath, outputFilePath);
+      } catch (error) {
+          console.error(`Operation failed: ${error.message}`);
+      }
+  } else {
+      console.error('Please provide both input and output file paths for decompression.');
+  }
+} else {
       throw new Error('Invalid command. Please use "up", "cd <path>",cat <filename>, add <filename>, or ".exit".');
     }
   } catch (error) {
