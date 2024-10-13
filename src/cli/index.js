@@ -10,6 +10,7 @@ import  {copyFile} from "../fs/copy.js";
 import  {moveFile} from "../fs/move.js";
 import  {deleteFile} from "../fs/delete.js";
 import  {handleOsCommand} from "../osInfo/osInfo.js";
+import  {fileHash} from "../hash/hash.js";
 
 
 
@@ -102,6 +103,19 @@ const handleUserInput = async (input) => {
       await handleOsCommand(args);
   } else {
       console.error('Please provide a valid os command.');
+  }
+} else if (input.trim().startsWith('hash ')) {
+  const filePath = input.slice(5).trim();
+  if (filePath) {
+      try {
+          await fs.promises.access(filePath);
+          const hash = await fileHash(filePath);
+          console.log(`Hash of file "${filePath}": ${hash}`);
+      } catch (error) {
+          console.error(`Operation failed: ${error.message}`);
+      }
+  } else {
+      console.error('Please provide a valid file path for hash calculation.');
   }
 }  else {
       throw new Error('Invalid command. Please use "up", "cd <path>",cat <filename>, add <filename>, or ".exit".');
