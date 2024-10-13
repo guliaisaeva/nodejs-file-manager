@@ -1,10 +1,15 @@
 import readline from 'node:readline';
+import fs from 'node:fs';
 import {getUserName}from "../user/user.js";
 import { homeDirectory,displayCurrentDirectory,goUp,changeDirectory,listDirectoryContents} from '../directories/directory.js';
 import path from 'node:path';
 import {read} from "../fs/read.js";
 import {createEmptyFile} from "../fs/create.js";
 import  {renameFile} from "../fs/rename.js";
+import  {copyFile} from "../fs/copy.js";
+import  {moveFile} from "../fs/move.js";
+
+
 
 
 const userName = getUserName();
@@ -45,7 +50,44 @@ const handleUserInput = async (input) => {
       } else {
         console.error('Please provide both old and new file names.');
       }
-    }   else {
+    }else if (input.trim().startsWith('cp ')) {
+      const args = input.slice(3).trim().split(' ');
+
+      const fromPath = args[0];
+      const toDirectory = args[1];
+
+      if (fromPath && toDirectory) {
+          try {
+              await fs.promises.access(fromPath);
+
+              await fs.promises.access(toDirectory);
+
+              await copyFile(fromPath, toDirectory);
+          } catch (error) {
+              console.error(`Operation failed: ${error.message}`);
+          }
+      } else {
+          console.error('Please provide both source and destination paths.');
+      }
+  } else if (input.trim().startsWith('mv ')) {
+    const args = input.slice(3).trim().split(' ');
+
+    const fromPath = args[0];
+    const toDirectory = args[1];
+
+    if (fromPath && toDirectory) {
+        try {
+            await fs.promises.access(fromPath);
+            await fs.promises.access(toDirectory);
+            const destinationPath = await moveFile(fromPath, toDirectory);
+            console.log(`File moved to ${destinationPath}`);
+        } catch (error) {
+            console.error(`Operation failed: ${error.message}`);
+        }
+    } else {
+        console.error('Please provide both source and destination paths.');
+    }
+} else {
       throw new Error('Invalid command. Please use "up", "cd <path>",cat <filename>, add <filename>, or ".exit".');
     }
   } catch (error) {
@@ -79,5 +121,3 @@ usersInputReader.on('close', () => {
     console.log(`Thank you for using File Manager, ${userName}, goodbye!`);
     process.exit(0);
   });
-//   const filePath = path.join(process.cwd(), 'src/fs/files/fileToRead.txt');
-// readFileContent(filePath);
