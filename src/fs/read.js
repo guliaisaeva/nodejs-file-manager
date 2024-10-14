@@ -18,5 +18,3 @@ export const read = (filePath) => {
     });
   });
 };
-
-

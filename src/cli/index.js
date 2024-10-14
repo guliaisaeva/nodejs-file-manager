@@ -22,8 +22,6 @@ console.log(`Welcome to the File Manager, ${userName}!`);
 console.log(`Starting working directory is: ${homeDirectory}`);
 displayCurrentDirectory();
 
-
-
 const handleUserInput = async (input) => {
   try {
     console.log();
@@ -184,7 +182,7 @@ const handleUserInput = async (input) => {
       console.error('Please provide both input and output file paths for decompression.');
   }
 } else {
-  throw new Error('Invalid command. Please use one of the following: "up", "cd <path_to_directory>", "ls", "cat <path_to_file>", "add <new_file_name>", "rn <path_to_file> <new_filename>", "cp <path_to_file> <path_to_new_directory>", "mv <path_to_file> <path_to_new_directory>", "rm <path_to_file>", "os --cpus", "hash <path_to_file>", "compress <path_to_file> <path_to_destination>", "decompress <path_to_file> <path_to_destination>", or ".exit".');
+  throw new Error('Invalid command. Please use one of the following: "up", "cd <path_to_directory>", "ls", "cat src/fs/files/fileToRead.txt", "add fileName.txt", "rn <path_to_file> <new_filename>", "cp <path_to_file> <path_to_new_directory>", "mv <path_to_file> <path_to_new_directory>", "rm <path_to_file>", "os --cpus", "hash <path_to_file>", "compress <path_to_file> <path_to_destination>", "decompress <path_to_file> <path_to_destination>", or ".exit".');
 }
   } catch (error) {
     console.error(`Operation failed: ${error.message}`);
